@@ -9,6 +9,7 @@ import math
 import Cube
 import Obstacle
 import sqlite3
+
 pygame.init()
 screen_width = 930
 screen_height = 523
@@ -36,6 +37,8 @@ obstacle_speed = 400
 track = pygame.mixer.music.load("bgm.mp3")
 clock = pygame.time.Clock()
 maxcapther = 2
+
+
 def insertRecord(name, score):
     conn = sqlite3.connect('identifier.sqlite')
     cursor = conn.cursor()
@@ -64,6 +67,7 @@ def displayScoreBoard():
     result.sort(key=lambda score: score[1], reverse=True)
     print result
 
+
 def MainInterface(chapter):
     screen.fill((0, 0, 255))
     screen.blit(background, Vector2(0, 0))
@@ -84,11 +88,12 @@ def MainInterface(chapter):
                 if x in range(832, 912) and y in range(241, 321) and chapter < maxcapther:
                     return MainInterface(chapter + 1)
                 elif x in range(20, 100) and y in range(241, 321) and chapter > 1:
-                    #return GameStart(chapter)
+                    # return GameStart(chapter)
                     return MainInterface(chapter - 1)
                 elif x in range(315, 615) and y in range(150, 450):
                     return GameStart(chapter)
-                   # return MapEdit()
+                    # return MapEdit()
+
 
 def GameStart(chapter):
     def judge(p1, p2, p3, p4):
@@ -113,7 +118,8 @@ def GameStart(chapter):
             y = k1 * x + b1
         else:
             return 0
-        if x >= min(p1.x, p2.x) and x <= max(p1.x, p2.x) and y >= min(p1.y, p2.y) and y <= max(p1.y, p2.y) and x >= min(p3.x, p4.x) and x <= max(p3.x, p4.x) and y >= min(p3.y, p4.y) - 0.1 and y <= max(p3.y, p4.y) + 0.1:
+        if x >= min(p1.x, p2.x) and x <= max(p1.x, p2.x) and y >= min(p1.y, p2.y) and y <= max(p1.y, p2.y) and x >= min(
+                p3.x, p4.x) and x <= max(p3.x, p4.x) and y >= min(p3.y, p4.y) - 0.1 and y <= max(p3.y, p4.y) + 0.1:
             return 1
         else:
             return 0
@@ -155,7 +161,8 @@ def GameStart(chapter):
                         c = cube.position.y
                         start = pygame.time.get_ticks()
                     for ob in obs:
-                        if ob.style == 5 and cube.position.x > ob.points[0].x and cube.position.x < ob.points[1].x and cube.position.y > ob.points[0].y and cube.position.y < ob.points[2].y:
+                        if ob.style == 5 and cube.position.x > ob.points[0].x and cube.position.x < ob.points[
+                            1].x and cube.position.y > ob.points[0].y and cube.position.y < ob.points[2].y:
                             cube.state = 1
                             c = cube.position.y
                             start = pygame.time.get_ticks()
@@ -190,12 +197,12 @@ def GameStart(chapter):
                     p1 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[1])
                     p2 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[3])
                     if p1 == 1 and p2 == 1:
-                        if cube.position.x + 20> ob.position.x:
+                        if cube.position.x + 20 > ob.position.x:
                             cube.initposition()
                             c = ob.points[0].y - 20.1
                         else:
                             over = 1
-                    if p1 == 1and p2 == 0:
+                    if p1 == 1 and p2 == 0:
                         cube.initposition()
                         c = ob.points[0].y - 20.1
                     if p1 == 0 and p2 == 1:
@@ -224,6 +231,7 @@ def GameStart(chapter):
             return GameOver(chapter)
         pygame.display.update()
 
+
 def GameOver(chapter):
     death_str = "You Are Dead!"
     death_surface = my_font2.render(death_str, True, (255, 0, 0))
@@ -239,6 +247,7 @@ def GameOver(chapter):
         elif event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
                 return GameStart(chapter)
+
 
 def MapEdit():
     def drawbase():
@@ -295,7 +304,7 @@ def MapEdit():
                     else:
                         drawedit()
                     pygame.display.update()
-                #                                                                                                 左箭头
+                # 左箭头
                 elif x in range(20, 100) and y in range(241, 321) and offset >= 40:
                     offset -= 40
                     for ob in map:
@@ -305,7 +314,7 @@ def MapEdit():
                     else:
                         drawedit()
                     pygame.display.update()
-                #                                                                                               保存地图
+                # 保存地图
                 elif x in range(640, 680) and y in range(428, 468):
                     global maxcapther
                     maxcapther += 1
@@ -329,7 +338,7 @@ def MapEdit():
                         if select != 0:
                             drawedit()
                             pygame.display.update()
-                    #                                                                                           添加方块
+                    # 添加方块
                     else:
                         if y < 388:
                             for pos in map:
@@ -350,5 +359,6 @@ def MapEdit():
             if select != 0:
                 drawedit()
                 pygame.display.update()
+
 
 MainInterface(1)
