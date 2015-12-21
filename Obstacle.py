@@ -9,3 +9,5 @@ class Obstacle():
 
     def Move(self, direction, distance):
         self.position += direction * distance
+        for x in self.points:
+            x += direction * distance

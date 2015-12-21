@@ -16,7 +16,7 @@ screen = pygame.display.set_mode((screen_width, screen_height), 0, 32)
 
 background = pygame.image.load("background.png").convert()
 background.set_alpha(200)
-cube = Cube.Cube(Vector2(320, 368), pygame.image.load("cube.png").convert_alpha())
+cube = Cube.Cube(Vector2(320, 367.9), pygame.image.load("cube.png").convert_alpha())
 welcome = pygame.image.load("welcome.png").convert_alpha()
 left_arrow = pygame.image.load("left.png").convert_alpha()
 right_arrow = pygame.image.load("right.png").convert_alpha()
@@ -25,7 +25,7 @@ block1 = pygame.image.load("block1.png").convert_alpha()
 block2 = pygame.image.load("block2.png").convert_alpha()
 block3 = pygame.image.load("block3.png").convert_alpha()
 triangle = pygame.image.load("triangle.png").convert_alpha()
-obs_image = [floor, block1, block2, block3, triangle]
+obs_image = [floor, block1, block2, block3, triangle, pygame.image.load("cube.png").convert_alpha()]
 
 my_font = pygame.font.SysFont("arial.ttf", 40)
 my_font2 = pygame.font.SysFont("arial.ttf", 60)
@@ -36,7 +36,6 @@ obstacle_speed = 400
 track = pygame.mixer.music.load("bgm.mp3")
 clock = pygame.time.Clock()
 maxcapther = 2
-
 
 def MainInterface(chapter):
     screen.fill((0, 0, 255))
@@ -58,62 +57,60 @@ def MainInterface(chapter):
                 if x in range(832, 912) and y in range(241, 321) and chapter < maxcapther:
                     return MainInterface(chapter + 1)
                 elif x in range(20, 100) and y in range(241, 321) and chapter > 1:
-                    # return GameStart(chapter)
+                    #return GameStart(chapter)
                     return MainInterface(chapter - 1)
                 elif x in range(315, 615) and y in range(150, 450):
                     return GameStart(chapter)
-                    # return MapEdit()
-
+                   # return MapEdit()
 
 def GameStart(chapter):
     def judge(p1, p2, p3, p4):
-        flag = 0
-        if p1.y < 388 and p2.y > 388:
-            print p1, p2, p3, p4
         if p1.x != p2.x and p3.x == p4.x:
-            # print 1
             k1 = (p1.y - p2.y) / (p1.x - p2.x)
             b1 = (p1.x * p2.y - p1.y * p2.x) / (p1.x - p2.x)
-            y = k1 * p3.x + b1
-            if y > min(p3.y, p4.y) and y < max(p3.y, p4.y):
-                flag = 1
+            x = p3.x
+            y = k1 * x + b1
         elif p1.x == p2.x and p3.x != p4.x:
-            # print 2
             k2 = (p3.y - p4.y) / (p3.x - p4.x)
             b2 = (p3.x * p4.y - p3.y * p4.x) / (p3.x - p4.x)
-            y = k2 * p1.x + b2
-            if y > min(p1.y, p2.y) and y < max(p1.y, p2.y):
-                flag = 1
-        else:
-            # print 3
+            x = p1.x
+            y = k2 * x + b2
+        elif p1.x != p2.x and p3.x != p4.x:
             k1 = (p1.y - p2.y) / (p1.x - p2.x)
-            b1 = (p1.x * p2.y - p1.y * p2.x) / (p1.x - p2.x)
             k2 = (p3.y - p4.y) / (p3.x - p4.x)
+            if k1 == k2:
+                return 0
+            b1 = (p1.x * p2.y - p1.y * p2.x) / (p1.x - p2.x)
             b2 = (p3.x * p4.y - p3.y * p4.x) / (p3.x - p4.x)
             x = (b2 - b1) / (k1 - k2)
             y = k1 * x + b1
-            if x >= min(p1.x, p2.x) and x <= max(p1.x, p2.x) and y >= min(p1.y, p2.y) and y <= max(p1.y,
-                                                                                                   p2.y) and x >= min(
-                    p3.x, p4.x) and x <= max(p3.x, p4.x) and y >= min(p3.y, p4.y) and y <= max(p3.y, p4.y):
-                flag = 1
-        if flag:
-            print p1, p2, p3, p4, x, y
-        return flag
+        else:
+            return 0
+        if x >= min(p1.x, p2.x) and x <= max(p1.x, p2.x) and y >= min(p1.y, p2.y) and y <= max(p1.y, p2.y) and x >= min(p3.x, p4.x) and x <= max(p3.x, p4.x) and y >= min(p3.y, p4.y) - 0.1 and y <= max(p3.y, p4.y) + 0.1:
+            return 1
+        else:
+            return 0
 
     map = open("map" + str(chapter) + ".txt", "r")
     result1 = map.read().split('\n')
     result = [i for i in result1 if i != '']
-    obs = []
+    obs1 = []
     for x in result:
         line = x.split(" ")
-        obs.append(Obstacle.Obstacle(Vector2(int(line[0]), int(line[1])), obs_image[int(line[2])], int(line[2])))
+        obs1.append([int(line[0]), int(line[1]), int(line[2])])
+
     map.close()
+    obs = []
+    for ob in obs1:
+        if ob[0] < screen_width:
+            obs.append(Obstacle.Obstacle(Vector2(ob[0], ob[1]), obs_image[ob[2]], ob[2]))
+            obs1.remove(ob)
 
     score = 0
     offset = 0
     clock.tick()
     background_pos = Vector2(0, 0)
-    cube.position = Vector2(320, 368)
+    cube.position = Vector2(320, 367.9)
     cube.state = 0
     pygame.mixer.music.play()
     over = 0
@@ -130,12 +127,22 @@ def GameStart(chapter):
                         cube.state = 1
                         c = cube.position.y
                         start = pygame.time.get_ticks()
+                    for ob in obs:
+                        if ob.style == 5 and cube.position.x > ob.points[0].x and cube.position.x < ob.points[1].x and cube.position.y > ob.points[0].y and cube.position.y < ob.points[2].y:
+                            cube.state = 1
+                            c = cube.position.y
+                            start = pygame.time.get_ticks()
 
         screen.fill((0, 0, 255))
         screen.blit(background, background_pos)
 
         time_passed = clock.tick()
         time_passed_seconds = time_passed / 1000.0
+        offset += time_passed_seconds * obstacle_speed
+        for ob in obs1:
+            if ob[0] < screen_width + offset:
+                obs.append(Obstacle.Obstacle(Vector2(ob[0] - offset, ob[1]), obs_image[ob[2]], ob[2]))
+                obs1.remove(ob)
         score += time_passed_seconds * 10
         text_surface = my_font.render("Score " + str(score), True, (60, 0, 245))
 
@@ -145,22 +152,42 @@ def GameStart(chapter):
         screen.blit(rotated_sprite, (cube.position.x - w / 2, cube.position.y - h / 2))
 
         for ob in obs:
-            if ob.style != 4:
-                if cube.state != 0:
-                    if judge(cube.points[1], cube.points[2], ob.points[0], ob.points[1]):
-                        cube.state = 0
-            else:
+            if ob.style == 4:
                 distance = cube.position - ob.position - Vector2(20, 25)
                 if math.sqrt(distance.x * distance.x + distance.y * distance.y) < 35:
                     over = 1
+            elif ob.style == 5:
+                pass
+            else:
+                if cube.state != 0:
+                    p1 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[1])
+                    p2 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[3])
+                    if p1 == 1 and p2 == 1:
+                        if cube.position.x + 20> ob.position.x:
+                            cube.initposition()
+                            c = ob.points[0].y - 20.1
+                        else:
+                            over = 1
+                    if p1 == 1and p2 == 0:
+                        cube.initposition()
+                        c = ob.points[0].y - 20.1
+                    if p1 == 0 and p2 == 1:
+                        over = 1
+                    if cube.state == 1 and judge(cube.points[0], cube.points[1], ob.points[2], ob.points[3]):
+                        over = 1
+                else:
+                    if abs(cube.position.x + 20 - ob.position.x) < 1:
+                        if cube.points[2].y > ob.points[0].y and cube.points[0].y < ob.points[2].y:
+                            over = 1
+                    if cube.position.x > ob.points[1].x and cube.points[0].x < ob.points[1].x:
+                        cube.state = 2
+                        c = cube.position.y
+                        start = pygame.time.get_ticks()
 
             screen.blit(ob.image, ob.position)
             ob.Move(Vector2(-1, 0), time_passed_seconds * obstacle_speed)
             if ob.position.x + ob.width < 0:
                 obs.remove(ob)
-                # print len(obs)
-
-        offset += time_passed_seconds * obstacle_speed
 
         screen.blit(text_surface, Vector2(750, 50))
         background_pos.x -= time_passed_seconds * background_speed
@@ -169,7 +196,6 @@ def GameStart(chapter):
         if over:
             return GameOver(chapter)
         pygame.display.update()
-
 
 def GameOver(chapter):
     death_str = "You Are Dead!"
@@ -186,7 +212,6 @@ def GameOver(chapter):
         elif event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
                 return GameStart(chapter)
-
 
 def MapEdit():
     def drawbase():
@@ -234,7 +259,6 @@ def MapEdit():
                 if x in range(832, 912) and y in range(241, 321):
                     offset += 40
                     if offset + screen_width > floornum * 1024:
-                        # print offset
                         map.append([floornum * 1024 - offset, 388, 0])
                         floornum += 1
                     for ob in map:
@@ -244,7 +268,7 @@ def MapEdit():
                     else:
                         drawedit()
                     pygame.display.update()
-                # 左箭头
+                #                                                                                                 左箭头
                 elif x in range(20, 100) and y in range(241, 321) and offset >= 40:
                     offset -= 40
                     for ob in map:
@@ -254,7 +278,7 @@ def MapEdit():
                     else:
                         drawedit()
                     pygame.display.update()
-                # 保存地图
+                #                                                                                               保存地图
                 elif x in range(640, 680) and y in range(428, 468):
                     global maxcapther
                     maxcapther += 1
@@ -278,7 +302,7 @@ def MapEdit():
                         if select != 0:
                             drawedit()
                             pygame.display.update()
-                    # 添加方块
+                    #                                                                                           添加方块
                     else:
                         if y < 388:
                             for pos in map:
@@ -299,6 +323,5 @@ def MapEdit():
             if select != 0:
                 drawedit()
                 pygame.display.update()
-
 
 MainInterface(1)

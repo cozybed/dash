@@ -1,8 +1,15 @@
-#from gameobjects.vector2 import Vector2
+from gameobjects.vector2 import Vector2
 import math
 class Cube():
     def __init__(self, position, image):
         self.cube_image = image
+        self.position = position
+        self.rotation = 0
+        self.state = 0
+        self.points = [position + (-20, -20), position + (20, -20), position + (20, 20), position + (-20, 20)]
+
+    def initposition(self):
+        position = Vector2(320, 367.9)
         self.position = position
         self.rotation = 0
         self.state = 0
@@ -23,5 +30,9 @@ class Cube():
             self.rotation = 0
         if self.state == 1:
             self.position.y = 0.01 * x * x - 2 * x + c
+            self.rotation = -0.9 * x
+            self.updatepoints()
+        if self.state == 2:
+            self.position.y = 0.01 * x * x + c
             self.rotation = -0.9 * x
             self.updatepoints()
