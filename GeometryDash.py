@@ -8,7 +8,7 @@ from gameobjects.vector2 import Vector2
 import math
 import Cube
 import Obstacle
-
+import sqlite3
 pygame.init()
 screen_width = 930
 screen_height = 523
@@ -36,6 +36,33 @@ obstacle_speed = 400
 track = pygame.mixer.music.load("bgm.mp3")
 clock = pygame.time.Clock()
 maxcapther = 2
+def insertRecord(name, score):
+    conn = sqlite3.connect('identifier.sqlite')
+    cursor = conn.cursor()
+    newData = [
+        (name, score),
+    ]
+    try:
+        for t in newData:
+            cursor.execute('INSERT INTO ScoreBoard VALUES (?,?)', t)
+        conn.commit()
+        conn.close()
+    except:
+        cursor.execute('UPDATE ScoreBoard SET score = ? WHERE name = ?', (score, name))
+        conn.commit()
+        conn.close()
+
+
+# insertRecord('sandy', 11)
+
+
+def displayScoreBoard():
+    conn = sqlite3.connect("identifier.sqlite")
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM ScoreBoard')
+    result = cursor.fetchall()
+    result.sort(key=lambda score: score[1], reverse=True)
+    print result
 
 def MainInterface(chapter):
     screen.fill((0, 0, 255))
