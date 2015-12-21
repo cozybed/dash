@@ -37,6 +37,7 @@ track = pygame.mixer.music.load("bgm.mp3")
 clock = pygame.time.Clock()
 maxcapther = 2
 
+
 def MainInterface(chapter):
     screen.fill((0, 0, 255))
     screen.blit(background, Vector2(0, 0))
@@ -57,11 +58,12 @@ def MainInterface(chapter):
                 if x in range(832, 912) and y in range(241, 321) and chapter < maxcapther:
                     return MainInterface(chapter + 1)
                 elif x in range(20, 100) and y in range(241, 321) and chapter > 1:
-                    #return GameStart(chapter)
+                    # return GameStart(chapter)
                     return MainInterface(chapter - 1)
                 elif x in range(315, 615) and y in range(150, 450):
                     return GameStart(chapter)
-                   # return MapEdit()
+                    # return MapEdit()
+
 
 def GameStart(chapter):
     def judge(p1, p2, p3, p4):
@@ -69,28 +71,30 @@ def GameStart(chapter):
         if p1.y < 388 and p2.y > 388:
             print p1, p2, p3, p4
         if p1.x != p2.x and p3.x == p4.x:
-            #print 1
+            # print 1
             k1 = (p1.y - p2.y) / (p1.x - p2.x)
             b1 = (p1.x * p2.y - p1.y * p2.x) / (p1.x - p2.x)
             y = k1 * p3.x + b1
             if y > min(p3.y, p4.y) and y < max(p3.y, p4.y):
                 flag = 1
         elif p1.x == p2.x and p3.x != p4.x:
-            #print 2
+            # print 2
             k2 = (p3.y - p4.y) / (p3.x - p4.x)
             b2 = (p3.x * p4.y - p3.y * p4.x) / (p3.x - p4.x)
             y = k2 * p1.x + b2
             if y > min(p1.y, p2.y) and y < max(p1.y, p2.y):
                 flag = 1
         else:
-            #print 3
+            # print 3
             k1 = (p1.y - p2.y) / (p1.x - p2.x)
             b1 = (p1.x * p2.y - p1.y * p2.x) / (p1.x - p2.x)
             k2 = (p3.y - p4.y) / (p3.x - p4.x)
             b2 = (p3.x * p4.y - p3.y * p4.x) / (p3.x - p4.x)
             x = (b2 - b1) / (k1 - k2)
             y = k1 * x + b1
-            if x >= min(p1.x, p2.x) and x <= max(p1.x, p2.x) and y >= min(p1.y, p2.y) and y <= max(p1.y, p2.y) and x >= min(p3.x, p4.x) and x <= max(p3.x, p4.x) and y >= min(p3.y, p4.y) and y <= max(p3.y, p4.y):
+            if x >= min(p1.x, p2.x) and x <= max(p1.x, p2.x) and y >= min(p1.y, p2.y) and y <= max(p1.y,
+                                                                                                   p2.y) and x >= min(
+                    p3.x, p4.x) and x <= max(p3.x, p4.x) and y >= min(p3.y, p4.y) and y <= max(p3.y, p4.y):
                 flag = 1
         if flag:
             print p1, p2, p3, p4, x, y
@@ -166,6 +170,7 @@ def GameStart(chapter):
             return GameOver(chapter)
         pygame.display.update()
 
+
 def GameOver(chapter):
     death_str = "You Are Dead!"
     death_surface = my_font2.render(death_str, True, (255, 0, 0))
@@ -181,6 +186,7 @@ def GameOver(chapter):
         elif event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
                 return GameStart(chapter)
+
 
 def MapEdit():
     def drawbase():
@@ -228,7 +234,7 @@ def MapEdit():
                 if x in range(832, 912) and y in range(241, 321):
                     offset += 40
                     if offset + screen_width > floornum * 1024:
-                        #print offset
+                        # print offset
                         map.append([floornum * 1024 - offset, 388, 0])
                         floornum += 1
                     for ob in map:
@@ -238,7 +244,7 @@ def MapEdit():
                     else:
                         drawedit()
                     pygame.display.update()
-                #                                                                                                 左箭头
+                # 左箭头
                 elif x in range(20, 100) and y in range(241, 321) and offset >= 40:
                     offset -= 40
                     for ob in map:
@@ -248,7 +254,7 @@ def MapEdit():
                     else:
                         drawedit()
                     pygame.display.update()
-                #                                                                                               保存地图
+                # 保存地图
                 elif x in range(640, 680) and y in range(428, 468):
                     global maxcapther
                     maxcapther += 1
@@ -272,7 +278,7 @@ def MapEdit():
                         if select != 0:
                             drawedit()
                             pygame.display.update()
-                    #                                                                                           添加方块
+                    # 添加方块
                     else:
                         if y < 388:
                             for pos in map:
@@ -293,5 +299,6 @@ def MapEdit():
             if select != 0:
                 drawedit()
                 pygame.display.update()
+
 
 MainInterface(1)
