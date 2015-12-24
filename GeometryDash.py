@@ -15,20 +15,24 @@ screen_width = 930
 screen_height = 523
 screen = pygame.display.set_mode((screen_width, screen_height), 0, 32)
 
-background = pygame.image.load("background.png").convert()
+background = pygame.image.load("./image/background.png").convert()
 background.set_alpha(200)
-cube = Cube.Cube(Vector2(320, 367.9), pygame.image.load("cube.png").convert_alpha())
-welcome = pygame.image.load("welcome.png").convert_alpha()
-left_arrow = pygame.image.load("left.png").convert_alpha()
-right_arrow = pygame.image.load("right.png").convert_alpha()
-floor = pygame.image.load("floor.png").convert_alpha()
-block1 = pygame.image.load("block1.png").convert_alpha()
-block2 = pygame.image.load("block2.png").convert_alpha()
-block3 = pygame.image.load("block3.png").convert_alpha()
-triangle = pygame.image.load("triangle.png").convert_alpha()
-jump = pygame.image.load("cube.png").convert_alpha()
-end = pygame.image.load("cube.png").convert_alpha()
-obs_image = [floor, block1, block2, block3, triangle, jump, end]
+cube = Cube.Cube(Vector2(320, 367.9), pygame.image.load("./image/cube.png").convert_alpha())
+welcome = pygame.image.load("./image/welcome.png").convert_alpha()
+left_arrow = pygame.image.load("./image/left.png").convert_alpha()
+right_arrow = pygame.image.load("./image/right.png").convert_alpha()
+floor = pygame.image.load("./image/floor.png").convert_alpha()
+block1 = pygame.image.load("./image/block1.png").convert_alpha()
+block2 = pygame.image.load("./image/block2.png").convert_alpha()
+block3 = pygame.image.load("./image/block3.png").convert_alpha()
+triangle1 = pygame.image.load("./image/triangle.png").convert_alpha()
+triangle2 = pygame.image.load("./image/triangle.png").convert_alpha()
+triangle3 = pygame.image.load("./image/triangle.png").convert_alpha()
+triangle4 = pygame.image.load("./image/triangle.png").convert_alpha()
+jump = pygame.image.load("./image/cube.png").convert_alpha()
+end = pygame.image.load("./image/cube.png").convert_alpha()
+createmap = pygame.image.load("./image/xinjianditu.png").convert_alpha()
+obs_image = [floor, block1, block2, block3, triangle1, triangle2, triangle3, triangle4, jump, end]
 
 my_font = pygame.font.SysFont("arial.ttf", 40)
 my_font2 = pygame.font.SysFont("arial.ttf", 60)
@@ -99,6 +103,7 @@ def MainInterface(chapter):
     screen.blit(left_arrow, Vector2(20, 241))
     screen.blit(right_arrow, Vector2(832, 241))
     screen.blit(chapter_surface, Vector2(370, 80))
+    screen.blit(createmap, Vector2(700, 400))
     pygame.display.update()
     while True:
         event = pygame.event.wait()
@@ -115,6 +120,8 @@ def MainInterface(chapter):
                 elif x in range(315, 615) and y in range(150, 450):
                     return GameStart(chapter)
                    # return MapEdit()
+                elif x in range(700, 800) and y in range(400, 500):
+                    return MapEdit()
 
 def GameStart(chapter):
     global score
@@ -145,7 +152,7 @@ def GameStart(chapter):
         else:
             return 0
 
-    map = open("map" + str(chapter) + ".txt", "r")
+    map = open("./map/map" + str(chapter) + ".txt", "r")
     result1 = map.read().split('\n')
     result = [i for i in result1 if i != '']
     obs1 = []
@@ -183,7 +190,7 @@ def GameStart(chapter):
                         c = cube.position.y
                         start = pygame.time.get_ticks()
                     for ob in obs:
-                        if ob.style == 5 and cube.position.x > ob.points[0].x and cube.position.x < ob.points[1].x and cube.position.y > ob.points[0].y and cube.position.y < ob.points[2].y:
+                        if ob.style == 8 and cube.position.x > ob.points[0].x and cube.position.x < ob.points[1].x and cube.position.y > ob.points[0].y and cube.position.y < ob.points[2].y:
                             cube.state = 1
                             c = cube.position.y
                             start = pygame.time.get_ticks()
@@ -211,13 +218,13 @@ def GameStart(chapter):
         screen.blit(rotated_sprite, (cube.position.x - w / 2, cube.position.y - h / 2))
 
         for ob in obs:
-            if ob.style == 4:
+            if ob.style in range(4, 8):
                 distance = cube.position - ob.position - Vector2(20, 27)
                 if math.sqrt(distance.x * distance.x + distance.y * distance.y) < 35:
                     over = 1
-            elif ob.style == 5:
+            elif ob.style == 8:
                 pass
-            elif ob.style == 6:
+            elif ob.style == 9:
                 if cube.points[1].x > ob.points[0].x:
                     return gamecomplete()
             else:
@@ -286,10 +293,8 @@ def MapEdit():
         for x in map:
             ob = Obstacle.Obstacle(Vector2(int(x[0]), int(x[1])), obs_image[int(x[2])], int(x[2]))
             screen.blit(ob.image, ob.position)
-        screen.blit(block1, Vector2(320, 428))
-        screen.blit(block2, Vector2(400, 428))
-        screen.blit(block3, Vector2(480, 428))
-        screen.blit(triangle, Vector2(560, 428))
+        for i in range(1, 10):
+            screen.blit(obs_image[i], Vector2(i * 80, 428))
         screen.blit(left_arrow, Vector2(20, 241))
         screen.blit(right_arrow, Vector2(832, 241))
 
@@ -345,10 +350,10 @@ def MapEdit():
                         drawedit()
                     pygame.display.update()
                 #                                                                                               保存地图
-                elif x in range(640, 680) and y in range(428, 468):
+                elif x in range(800, 840) and y in range(428, 468):
                     global maxcapther
                     maxcapther += 1
-                    out = open("map" + str(maxcapther) + ".txt", "w")
+                    out = open("./map/map" + str(maxcapther) + ".txt", "w")
                     for ob in map:
                         out.write(str(ob[0] + offset) + ' ' + str(ob[1]) + ' ' + str(ob[2]) + '\n')
                     out.close()
@@ -356,15 +361,8 @@ def MapEdit():
                 else:
                     #                                                                                           选择方块
                     if select == 0:
-                        if y in range(428, 468):
-                            if x in range(320, 360):
-                                select = 1
-                            if x in range(400, 440):
-                                select = 2
-                            if x in range(480, 520):
-                                select = 3
-                            if x in range(560, 600):
-                                select = 4
+                        if y in range(428, 468) and x in range(80, 760) and x % 80 < 40:
+                            select =  x / 80
                         if select != 0:
                             drawedit()
                             pygame.display.update()
