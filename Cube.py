@@ -7,6 +7,7 @@ class Cube():
         self.rotation = 0
         self.state = 0
         self.points = [position + (-20, -20), position + (20, -20), position + (20, 20), position + (-20, 20)]
+        self.role = 0
 
     def initposition(self):
         position = Vector2(320, 367.9)
@@ -29,10 +30,23 @@ class Cube():
             self.position.y = c
             self.rotation = 0
         if self.state == 1:
-            self.position.y = 0.01 * x * x - 2 * x + c
-            self.rotation = -0.9 * x
+           # self.position.y = 0.01 * x * x - 2 * x + c
+            if self.role == 0:
+                self.position.y = 0.01 * x * x - 2 * x + c
+                self.rotation = -0.9 * x
+            if self.role == 1:
+                if x < 100:
+                    self.position.y = 0.01 * x * x - 2 * x + c
+                    self.rotation = math.atan(-0.01 * x + 2) / math.pi * 180
+                else:
+                    self.position.y = 0.004 * x * x - 0.8 * x + c - 60
+                    self.rotation = math.atan(-0.004 * x + 0.8) / math.pi * 180
             self.updatepoints()
         if self.state == 2:
-            self.position.y = 0.01 * x * x + c
-            self.rotation = -0.9 * x
+            if self.role == 0:
+                self.position.y = 0.01 * x * x + c
+                self.rotation = -0.9 * x
+            if self.role == 1:
+                self.position.y = 0.004 * x * x + c
+                self.rotation = math.atan(-0.004 * x) / math.pi * 180
             self.updatepoints()

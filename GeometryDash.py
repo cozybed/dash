@@ -32,7 +32,10 @@ triangle4 = pygame.image.load("./image/triangle.png").convert_alpha()
 jump = pygame.image.load("./image/cube.png").convert_alpha()
 end = pygame.image.load("./image/cube.png").convert_alpha()
 createmap = pygame.image.load("./image/xinjianditu.png").convert_alpha()
-obs_image = [floor, block1, block2, block3, triangle1, triangle2, triangle3, triangle4, jump, end]
+door1 = pygame.image.load("./image/cube.png").convert_alpha()
+door2 = pygame.image.load("./image/cube.png").convert_alpha()
+door3 = pygame.image.load("./image/cube.png").convert_alpha()
+obs_image = [floor, block1, block2, block3, triangle1, triangle2, triangle3, triangle4, jump, end, door1, door2, door3]
 
 my_font = pygame.font.SysFont("arial.ttf", 40)
 my_font2 = pygame.font.SysFont("arial.ttf", 60)
@@ -174,6 +177,7 @@ def GameStart(chapter):
     background_pos = Vector2(0, 0)
     cube.position = Vector2(320, 367.9)
     cube.state = 0
+    cube.role = 0
     pygame.mixer.music.play()
     over = 0
     start = pygame.time.get_ticks()
@@ -194,6 +198,10 @@ def GameStart(chapter):
                             cube.state = 1
                             c = cube.position.y
                             start = pygame.time.get_ticks()
+                    if cube.role == 1:
+                        cube.state = 1
+                        c = cube.position.y
+                        start = pygame.time.get_ticks()
 
         screen.fill((0, 0, background_color))
         screen.blit(background, background_pos)
@@ -227,17 +235,21 @@ def GameStart(chapter):
             elif ob.style == 9:
                 if cube.points[1].x > ob.points[0].x:
                     return gamecomplete()
+            elif ob.style == 11:
+                if cube.points[1].x > ob.points[0].x:
+                    cube.role = 1
             else:
                 if cube.state != 0:
                     p1 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[1])
                     p2 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[3])
+                    x = pygame.time.get_ticks() - start
                     if p1 == 1 and p2 == 1:
-                        if cube.position.x + 20> ob.position.x:
+                        if cube.position.x + 20> ob.position.x and (x > 100 or cube.state == 2):
                             cube.initposition()
                             c = ob.points[0].y - 20.1
                         else:
                             over = 1
-                    if p1 == 1 and p2 == 0:
+                    if p1 == 1 and p2 == 0 and (x > 100 or cube.state == 2):
                         cube.initposition()
                         c = ob.points[0].y - 20.1
                     if p1 == 0 and p2 == 1:
