@@ -17,7 +17,8 @@ screen = pygame.display.set_mode((screen_width, screen_height), 0, 32)
 
 background = pygame.image.load("./image/background.png").convert()
 background.set_alpha(200)
-cube = Cube.Cube(Vector2(320, 367.9), pygame.image.load("./image/cube.png").convert_alpha())
+cube_image1 = pygame.image.load("./image/cube.png").convert_alpha()
+cube_image2 = pygame.image.load("./image/bird.png").convert_alpha()
 welcome = pygame.image.load("./image/welcome.png").convert_alpha()
 left_arrow = pygame.image.load("./image/left.png").convert_alpha()
 right_arrow = pygame.image.load("./image/right.png").convert_alpha()
@@ -36,6 +37,8 @@ door1 = pygame.image.load("./image/cube.png").convert_alpha()
 door2 = pygame.image.load("./image/cube.png").convert_alpha()
 door3 = pygame.image.load("./image/cube.png").convert_alpha()
 obs_image = [floor, block1, block2, block3, triangle1, triangle2, triangle3, triangle4, jump, end, door1, door2, door3]
+
+cube = Cube.Cube(Vector2(320, 367.9), cube_image1)
 
 my_font = pygame.font.SysFont("arial.ttf", 40)
 my_font2 = pygame.font.SysFont("arial.ttf", 60)
@@ -118,11 +121,9 @@ def MainInterface(chapter):
                 if x in range(832, 912) and y in range(241, 321) and chapter < maxcapther:
                     return MainInterface(chapter + 1)
                 elif x in range(20, 100) and y in range(241, 321) and chapter > 1:
-                    #return GameStart(chapter)
                     return MainInterface(chapter - 1)
                 elif x in range(315, 615) and y in range(150, 450):
                     return GameStart(chapter)
-                   # return MapEdit()
                 elif x in range(700, 800) and y in range(400, 500):
                     return MapEdit()
 
@@ -175,6 +176,7 @@ def GameStart(chapter):
     clock.tick()
     background_color = 0
     background_pos = Vector2(0, 0)
+    cube.cube_image = cube_image1
     cube.position = Vector2(320, 367.9)
     cube.state = 0
     cube.role = 0
@@ -203,7 +205,10 @@ def GameStart(chapter):
                         c = cube.position.y
                         start = pygame.time.get_ticks()
 
-        screen.fill((0, 0, background_color))
+        if cube.role == 0:
+            screen.fill((0, 0, background_color))
+        elif cube.role == 1:
+            screen.fill((0, background_color, 0))
         screen.blit(background, background_pos)
 
         time_passed = clock.tick()
@@ -238,6 +243,7 @@ def GameStart(chapter):
             elif ob.style == 11:
                 if cube.points[1].x > ob.points[0].x:
                     cube.role = 1
+                    cube.cube_image = cube_image2
             else:
                 if cube.state != 0:
                     p1 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[1])
