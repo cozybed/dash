@@ -11,14 +11,21 @@ import Obstacle
 import sqlite3
 
 pygame.init()
+
 screen_width = 930
 screen_height = 523
 screen = pygame.display.set_mode((screen_width, screen_height), 0, 32)
 
+input = pygame.image.load("./image/input.png").convert_alpha()
+save = pygame.image.load("./image/save.png").convert_alpha()
+back = pygame.image.load("./image/back.png").convert_alpha()
+board = pygame.image.load("./image/board.jpg").convert_alpha()
+restart = pygame.image.load("./image/restart.png").convert_alpha()
 background = pygame.image.load("./image/background.png").convert()
 background.set_alpha(200)
 cube_image1 = pygame.image.load("./image/cube.png").convert_alpha()
 cube_image2 = pygame.image.load("./image/bird.png").convert_alpha()
+cube_image3 = pygame.image.load("./image/arrow.png").convert_alpha()
 welcome = pygame.image.load("./image/welcome.png").convert_alpha()
 left_arrow = pygame.image.load("./image/left.png").convert_alpha()
 right_arrow = pygame.image.load("./image/right.png").convert_alpha()
@@ -26,27 +33,28 @@ floor = pygame.image.load("./image/floor.png").convert_alpha()
 block1 = pygame.image.load("./image/block1.png").convert_alpha()
 block2 = pygame.image.load("./image/block2.png").convert_alpha()
 block3 = pygame.image.load("./image/block3.png").convert_alpha()
-triangle1 = pygame.image.load("./image/triangle.png").convert_alpha()
-triangle2 = pygame.image.load("./image/triangle.png").convert_alpha()
-triangle3 = pygame.image.load("./image/triangle.png").convert_alpha()
-triangle4 = pygame.image.load("./image/triangle.png").convert_alpha()
-jump = pygame.image.load("./image/cube.png").convert_alpha()
-end = pygame.image.load("./image/cube.png").convert_alpha()
+triangle1 = pygame.image.load("./image/triangle1.png").convert_alpha()
+triangle2 = pygame.image.load("./image/triangle2.png").convert_alpha()
+triangle3 = pygame.image.load("./image/triangle3.png").convert_alpha()
+triangle4 = pygame.image.load("./image/triangle4.png").convert_alpha()
+jump = pygame.image.load("./image/jump.png").convert_alpha()
+end = pygame.image.load("./image/flag7.png").convert_alpha()
 createmap = pygame.image.load("./image/xinjianditu.png").convert_alpha()
-door1 = pygame.image.load("./image/cube.png").convert_alpha()
-door2 = pygame.image.load("./image/cube.png").convert_alpha()
-door3 = pygame.image.load("./image/cube.png").convert_alpha()
+door1 = pygame.image.load("./image/flag5.png").convert_alpha()
+door2 = pygame.image.load("./image/flag2.png").convert_alpha()
+door3 = pygame.image.load("./image/flag3.png").convert_alpha()
 obs_image = [floor, block1, block2, block3, triangle1, triangle2, triangle3, triangle4, jump, end, door1, door2, door3]
 
 cube = Cube.Cube(Vector2(320, 367.9), cube_image1)
 
 my_font = pygame.font.SysFont("arial.ttf", 40)
 my_font2 = pygame.font.SysFont("arial.ttf", 60)
+my_font3 = pygame.font.SysFont("arial.ttf", 35)
 
 background_speed = 50
 obstacle_speed = 400
 
-track = pygame.mixer.music.load("bgm.mp3")
+music = ["bgm.mp3", "bgm.mp3", "bgm.mp3"]
 clock = pygame.time.Clock()
 maxcapther = 2
 name = ""
@@ -74,7 +82,7 @@ def displayScoreBoard():
     cursor.execute('SELECT * FROM ScoreBoard')
     result = cursor.fetchall()
     result.sort(key = lambda score: score[1], reverse = True)
-    print result
+    return result
 
 def InputName():
     global name
@@ -83,21 +91,23 @@ def InputName():
         if event.type == QUIT:
             exit()
         elif event.type == KEYDOWN:
-            if event.key >= 97 and event.key <= 122:
+            if event.key >= 97 and event.key <= 122 and len(name) < 7:
                 name += chr(event.key)
-            elif event.key >= 256 and event.key <= 265:
+            elif event.key >= 256 and event.key <= 265 and len(name) < 7:
                 name += str(event.key - 256)
             elif event.key == 8 and len(name) > 0:
                 name = name[:-1]
-            elif event.key == 13:
+            elif (event.key == 13 or event.key == 271) and len(name) > 0:
                 return MainInterface(1)
 
         screen.fill((0, 0, 255))
         screen.blit(background, Vector2(0, 0))
-        text_surface = my_font.render("InputName:", True, (60, 0, 245))
-        name_surface = my_font.render(name, True, (60, 0, 245))
-        screen.blit(text_surface, Vector2(340, 200))
-        screen.blit(name_surface, Vector2(340, 300))
+        screen.blit(pygame.transform.rotate(input, 90), Vector2(209, 200))
+        text_surface = my_font.render("InputName:", True, (196, 131, 65))
+        screen.blit(text_surface, Vector2(380, 235))
+        screen.blit(pygame.transform.rotate(input, 90), Vector2(209, 290))
+        name_surface = my_font.render(name, True, (30, 196, 5))
+        screen.blit(name_surface, Vector2(410, 325))
         pygame.display.update()
 
 def MainInterface(chapter):
@@ -128,7 +138,7 @@ def MainInterface(chapter):
                     return MapEdit()
 
 def GameStart(chapter):
-    global score
+    global score, obstacle_speed
     def judge(p1, p2, p3, p4):
         if p1.x != p2.x and p3.x == p4.x:
             k1 = (p1.y - p2.y) / (p1.x - p2.x)
@@ -155,6 +165,8 @@ def GameStart(chapter):
             return 1
         else:
             return 0
+    #pygame.mixer.init()
+    #pygame.time.delay(1000)
 
     map = open("./map/map" + str(chapter) + ".txt", "r")
     result1 = map.read().split('\n')
@@ -177,9 +189,8 @@ def GameStart(chapter):
     background_color = 0
     background_pos = Vector2(0, 0)
     cube.cube_image = cube_image1
-    cube.position = Vector2(320, 367.9)
-    cube.state = 0
-    cube.role = 0
+    cube.initall()
+    pygame.mixer.music.load(music[chapter - 1])
     pygame.mixer.music.play()
     over = 0
     start = pygame.time.get_ticks()
@@ -204,11 +215,23 @@ def GameStart(chapter):
                         cube.state = 1
                         c = cube.position.y
                         start = pygame.time.get_ticks()
+                    if cube.role == 2:
+                        print 1
+                        cube.up = 1
+                        c = cube.position.y
+                        start = pygame.time.get_ticks()
+            elif event.type == KEYUP:
+                if cube.up == 1:
+                    cube.up = 0
+                    c = cube.position.y
+                    start = pygame.time.get_ticks()
 
         if cube.role == 0:
             screen.fill((0, 0, background_color))
         elif cube.role == 1:
             screen.fill((0, background_color, 0))
+        elif cube.role == 2:
+            screen.fill((background_color, 0, 0))
         screen.blit(background, background_pos)
 
         time_passed = clock.tick()
@@ -230,9 +253,23 @@ def GameStart(chapter):
         w, h = rotated_sprite.get_size()
         screen.blit(rotated_sprite, (cube.position.x - w / 2, cube.position.y - h / 2))
 
+        if cube.points[0].y < 0 or cube.points[2].y > screen_height:
+            over = 1
         for ob in obs:
-            if ob.style in range(4, 8):
-                distance = cube.position - ob.position - Vector2(20, 27)
+            if ob.style == 4:
+                distance = cube.position - ob.position - Vector2(20, 25)
+                if math.sqrt(distance.x * distance.x + distance.y * distance.y) < 35:
+                    over = 1
+            elif ob.style == 5:
+                distance = cube.position - ob.position - Vector2(15, 20)
+                if math.sqrt(distance.x * distance.x + distance.y * distance.y) < 35:
+                    over = 1
+            elif ob.style == 6:
+                distance = cube.position - ob.position - Vector2(20, 15)
+                if math.sqrt(distance.x * distance.x + distance.y * distance.y) < 35:
+                    over = 1
+            elif ob.style == 7:
+                distance = cube.position - ob.position - Vector2(25, 20)
                 if math.sqrt(distance.x * distance.x + distance.y * distance.y) < 35:
                     over = 1
             elif ob.style == 8:
@@ -244,7 +281,14 @@ def GameStart(chapter):
                 if cube.points[1].x > ob.points[0].x:
                     cube.role = 1
                     cube.cube_image = cube_image2
-            else:
+            elif ob.style == 12:
+                if cube.points[1].x > ob.points[0].x and cube.role != 2:
+                    cube.role = 2
+                    cube.cube_image = cube_image3
+                    obstacle_speed = 500
+                    c = cube.position.y
+                    start = pygame.time.get_ticks()
+            elif not (ob.points[0].x > cube.points[1].x or ob.points[1] < cube.points[0].x):
                 if cube.state != 0:
                     p1 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[1])
                     p2 = judge(cube.points[1], cube.points[2], ob.points[0], ob.points[3])
@@ -274,7 +318,8 @@ def GameStart(chapter):
             ob.Move(Vector2(-1, 0), time_passed_seconds * obstacle_speed)
             if ob.position.x + ob.width < 0:
                 obs.remove(ob)
-
+        pygame.draw.line(screen, (255, 0, 0), (0, 0), (930, 0), 5)
+        pygame.draw.line(screen, (255, 0, 0), (0, 523), (930, 523), 5)
         screen.blit(text_surface, Vector2(750, 50))
         background_pos.x -= time_passed_seconds * background_speed
         if background_pos.x < -screen_width:
@@ -283,11 +328,26 @@ def GameStart(chapter):
             return GameOver(chapter)
         pygame.display.update()
 
-def GameOver(chapter):
-    displayScoreBoard()
-    death_str = "You Are Dead!"
-    death_surface = my_font2.render(death_str, True, (255, 0, 0))
-    screen.blit(death_surface, Vector2(340, 200))
+def showscore(chapter):
+    global score
+    scorelist = displayScoreBoard()
+    screen.blit(board, Vector2(200, 66))
+    for i in range(min(5, len(scorelist))):
+        player = str(i + 1) + '. '+ scorelist[i][0]
+        player_score = str(scorelist[i][1])
+        player_surface = my_font3.render(player, True, (255, 0, 0))
+        score_surface = my_font3.render(player_score, True, (255, 0, 0))
+        screen.blit(player_surface, Vector2(230, 130 + 40 * i))
+        screen.blit(score_surface, Vector2(370, 130 + 40 * i))
+    for i in range(5, min(10, len(scorelist))):
+        player = str(i + 1) + '. '+ scorelist[i][0]
+        player_score = str(scorelist[i][1])
+        player_surface = my_font3.render(player, True, (255, 0, 0))
+        score_surface = my_font3.render(player_score, True, (255, 0, 0))
+        screen.blit(player_surface, Vector2(500, 130 + 40 * (i - 5)))
+        screen.blit(score_surface, Vector2(640, 130 + 40 * (i - 5)))
+    screen.blit(back, Vector2(300, 340))
+    screen.blit(restart, Vector2(570, 340))
     pygame.display.update()
     while True:
         event = pygame.event.wait()
@@ -298,7 +358,21 @@ def GameOver(chapter):
                 return GameStart(chapter)
         elif event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
-                return GameStart(chapter)
+                x, y = event.pos
+                if x in range(300, 360) and y in range(340, 400):
+                    pygame.mixer.music.stop()
+                    return MainInterface(1)
+                if x in range(570, 630) and y in range(340, 400):
+                    return GameStart(chapter)
+
+def GameOver(chapter):
+    #displayScoreBoard()
+    death_str = "You Are Dead!"
+    death_surface = my_font2.render(death_str, True, (255, 0, 0))
+    screen.blit(death_surface, Vector2(340, 200))
+    pygame.display.update()
+    pygame.time.delay(1000)
+    showscore(chapter)
 
 def gamecomplete():
     global name, score
@@ -313,8 +387,12 @@ def MapEdit():
             screen.blit(ob.image, ob.position)
         for i in range(1, 10):
             screen.blit(obs_image[i], Vector2(i * 80, 428))
+        for i in range(10, 13):
+            screen.blit(obs_image[i], Vector2(i * 40 + 360, 428))
         screen.blit(left_arrow, Vector2(20, 241))
         screen.blit(right_arrow, Vector2(832, 241))
+        screen.blit(back, Vector2(20, 20))
+        screen.blit(save, Vector2(850, 20))
 
     def drawedit():
         drawbase()
@@ -368,7 +446,7 @@ def MapEdit():
                         drawedit()
                     pygame.display.update()
                 #                                                                                               保存地图
-                elif x in range(800, 840) and y in range(428, 468):
+                elif x in range(850, 910) and y in range(20, 80):
                     global maxcapther
                     maxcapther += 1
                     out = open("./map/map" + str(maxcapther) + ".txt", "w")
@@ -376,11 +454,16 @@ def MapEdit():
                         out.write(str(ob[0] + offset) + ' ' + str(ob[1]) + ' ' + str(ob[2]) + '\n')
                     out.close()
                     return MainInterface(1)
+                #                                                                                                   返回
+                elif x in range(20, 80) and y in range(20, 80):
+                    MainInterface(1)
                 else:
                     #                                                                                           选择方块
                     if select == 0:
                         if y in range(428, 468) and x in range(80, 760) and x % 80 < 40:
                             select =  x / 80
+                        if y in range(428, 468) and x in range(760, 880):
+                            select =  (x - 760) / 40 + 10
                         if select != 0:
                             drawedit()
                             pygame.display.update()
