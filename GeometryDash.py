@@ -212,6 +212,8 @@ def GameStart(chapter):
     background_color = 0
     background_pos = Vector2(0, 0)
     cube.cube_image = cube_image1
+    if score != 0:
+        savepos.y -= 40
     cube.initall(savepos.y)
     obstacle_speed = 400
     #pygame.mixer.music.load(music[2])
