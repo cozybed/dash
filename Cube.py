@@ -5,21 +5,21 @@ class Cube():
         self.cube_image = image
         self.position = position
         self.rotation = 0
-        self.state = 0
+        self.state = 2
         self.points = [position + (-20, -20), position + (20, -20), position + (20, 20), position + (-20, 20)]
         self.role = 0
         self.up = 0
 
-    def initposition(self):
-        position = Vector2(320, 367.9)
+    def initposition(self, c):
+        position = Vector2(320, c)
         self.position = position
         self.rotation = 0
         self.state = 0
         self.points = [position + (-20, -20), position + (20, -20), position + (20, 20), position + (-20, 20)]
 
-    def initall(self):
-        self.initposition()
-        self.state = 0
+    def initall(self, c):
+        self.initposition(c)
+        self.state = 2
         self.role = 0
         self.up = 0
 
@@ -37,7 +37,6 @@ class Cube():
             self.position.y = c
             self.rotation = 0
         if self.state == 1:
-           # self.position.y = 0.01 * x * x - 2 * x + c
             if self.role == 0:
                 self.position.y = 0.01 * x * x - 2 * x + c
                 self.rotation = -0.9 * x
@@ -48,13 +47,6 @@ class Cube():
                 else:
                     self.position.y = 0.004 * x * x - 0.8 * x + c - 60
                     self.rotation = math.atan(-0.004 * x + 0.8) / math.pi * 180
-            if self.role == 2:
-                if self.up == 0:
-                    self.position.y = x + c
-                    self.rotation = 45
-                else:
-                    self.position.y = -x + c
-                    self.rotation = -45
             self.updatepoints()
         if self.state == 2:
             if self.role == 0:
@@ -64,3 +56,10 @@ class Cube():
                 self.position.y = 0.004 * x * x + c
                 self.rotation = math.atan(-0.004 * x) / math.pi * 180
             self.updatepoints()
+        if self.role == 2:
+            if self.up == 0:
+                self.position.y = x + c
+                self.rotation = -45
+            else:
+                self.position.y = -x + c
+                self.rotation = 45
